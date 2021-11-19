@@ -1,0 +1,105 @@
+<div class="d-flex justify-content-center" id="htmlData">
+  <div style="width: 100%; max-width: 50rem;">
+
+    <!-- Nombre del Presupuesto y Saldo total -->
+
+    <div class="d-flex justify-content-center">
+      <div class="input-group input-group-lg mb-3 mt-3">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Nombre del Presupuesto"
+          #NombrePresupuesto
+          [formControl]="nombre"
+        />
+      </div>
+    </div>
+    <div class="d-flex justify-content-center" data-html2canvas-ignore>
+      <div class="input-group input-group-lg mb-3">
+        <span class="input-group-text" id="basic-addon1">Saldo total</span>
+        <input
+          type="number"
+          class="form-control"
+          #SaldoTotal
+          [formControl]="saldo"
+          (keyup)="inputSaldoTotal(SaldoTotal.value)"
+        />
+      </div>
+    </div>
+
+    <!-- Tabla de Gastos -->
+
+    <table class="table table-light table-bordered border-dark">
+      <thead>
+        <tr>
+          <td class="fs-5" align="center"><strong>Gasto</strong></td>
+          <td class="fs-5" align="center"><strong>Valor</strong></td>
+          <td data-html2canvas-ignore></td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let valorYgasto of gastoValor" #tr>
+          <td align="center" style="text-transform: capitalize;">{{valorYgasto.gasto}}</td>
+          <td align="center" style="vertical-align:middle;">
+            <input type="number" class="sinborde" [value]="valorYgasto.valor" #valorEdicion (focus)="cargarValorGasto(valorYgasto.valor)"
+            (keyup)="editarGasto(valorEdicion.value)">
+          </td>
+          <td data-html2canvas-ignore align="center" class="d-flex justify-content-center" style="text-decoration: none; padding-bottom: 10px;">
+            <a style="cursor: pointer;" (click)="eliminarGasto(tr, valorEdicion.value)"><i style="color: red;" class="fas fa-trash-alt"></i></a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Agregar Gastos con su valor -->
+
+    <div class="d-flex justify-content-center mt-3" data-html2canvas-ignore>
+      <form style="width: 100%;" #Formulario>
+        <div class="row row-cols-2">
+          <div class="col-md-5 col-sm-5 col-xs-6 input-group-lg">
+            <input type="text" class="form-control" placeholder="Gasto" [formControl]="gasto" required/>
+          </div>
+          <div class="col-md-5 col-sm-5 col-xs-6 input-group-lg">
+            <input type="number" class="form-control" placeholder="Valor" [formControl]="valor" required/>
+          </div>
+          <div class="d-flex justify-content-center col-12 col-md-2 col-sm-2">
+          <button type="button" class="btn btn-primary add"[disabled]="gasto.errors?.['required'] || valor.errors?.['required']" (click)="nuevoGasto(gasto.value, valor.value)">Agregar</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Total, Restante -->
+
+    <table class="table table-success table-bordered border-dark mt-3" [ngClass]="colorFondo">
+      <thead>
+        <tr>
+          <td align="center">Saldo Total</td>
+          <td align="center">Dinero Restante</td>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="fs-5" align="center"><strong>${{saldoTotal | thousandsPipe}}</strong></td>
+          <td class="fs-5" align="center"><strong>${{saldoRestante | thousandsPipe}}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Guardar Presupuesto -->
+
+    <div class="row" data-html2canvas-ignore>
+      <button id="btnCapturar" class="col btn btn-warning m-3 d-flex justify-content-md-around align-items-center"
+      [disabled]="nombre.errors?.['required'] || saldo.errors?.['required']"
+      (click)="downloadImagen()">
+        Guardar como Imagen<img src="../../assets/imagen.jpg" style="max-width: 30px;">
+      </button>
+      <button class="col btn btn-danger m-3 d-flex justify-content-md-around align-items-center"
+      (click)="downloadPDF()">
+        Guardar como PDF<img src="../../assets/pdf.png" style="max-width: 30px;">
+      </button>
+      <button class="col btn btn-success m-3"[disabled]="nombre.errors?.['required'] || saldo.errors?.['required']" (click)="guardarPlantilla(NombrePresupuesto.value)">Guardar plantilla</button>
+    </div>
+
+  </div>
+</div>
