@@ -1,6 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
-
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ToastrService } from 'ngx-toastr';
@@ -11,18 +10,20 @@ import { ToastrService } from 'ngx-toastr';
   styleUrls: ['./crear.component.css'],
 })
 export class CrearComponent {
+  @ViewChild('NombrePresupuesto', {static: false}) nombrePresupuesto: any;
   // VALIDACIONES HTML
   nombre = new FormControl('', Validators.required);
   saldo = new FormControl('', Validators.required);
   gasto = new FormControl('', Validators.required);
   valor = new FormControl('', Validators.required);
   // Variables
+  namePresupuesto: any;
   saldoTotal: number;
   saldoRestante: number;
   valorAnterior: any;
   valorParcial: any;
   colorFondo: any;
-
+  // ARRAYS DEL PROYECTO
   gastoValor: any[] = [];
   plantillaCompleta: any[] = [];
 
@@ -37,11 +38,9 @@ export class CrearComponent {
     this.saldoRestante = this.saldoTotal;
     this.saldoRestante = this.saldoRestante - this.valorParcial;
   }
-
   cargarValorGasto(value: any) {
     this.valorAnterior = +value;
   }
-
   nuevoGasto(gasto: any, value: any) {
     this.gastoValor.push({
       gasto: gasto,
@@ -53,88 +52,72 @@ export class CrearComponent {
     this.valorParcial = this.valorParcial + value;
     // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
     if (this.saldoRestante <= this.saldoTotal / 2) {
-      this.colorFondo = 'table-secondary';
-    }
-    if (this.saldoRestante <= this.saldoTotal / 4) {
       this.colorFondo = 'table-info';
     }
-    if (this.saldoRestante <= this.saldoTotal / 8) {
+    if (this.saldoRestante <= this.saldoTotal / 4) {
       this.colorFondo = 'table-warning';
     }
-    if (this.saldoRestante <= this.saldoTotal / 10) {
+    if (this.saldoRestante <= this.saldoTotal / 8) {
       this.colorFondo = 'table-danger';
     }
   }
-
   editarGasto(editado: any) {
     let edicion = +editado;
+    // SALDO RESTANTE
     this.saldoRestante = this.saldoRestante + this.valorAnterior;
     this.saldoRestante = this.saldoRestante - edicion;
-    console.log("primer valor", this.valorParcial);
-    this.valorParcial = edicion;
-    console.log("segundo valor", this.valorParcial);
+    // VALOR PARCIAL
+    this.valorParcial = this.valorParcial - this.valorAnterior;
+    this.valorParcial = this.valorParcial + edicion;
+    // ASIGNO UN NUEVO VALOR A "VALOR ANTERIOR"
     this.valorAnterior = edicion;
     // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
-    if (this.saldoRestante <= this.saldoTotal) {
-      this.colorFondo = 'table-table-success';
+    if (this.saldoRestante <= this.saldoTotal && this.saldoRestante > this.saldoTotal /2) {
+      this.colorFondo = 'table-success';
     }
     if (this.saldoRestante <= this.saldoTotal / 2) {
-      this.colorFondo = 'table-secondary';
-    }
-    if (this.saldoRestante <= this.saldoTotal / 4) {
       this.colorFondo = 'table-info';
     }
-    if (this.saldoRestante <= this.saldoTotal / 8) {
+    if (this.saldoRestante <= this.saldoTotal / 4) {
       this.colorFondo = 'table-warning';
     }
-    if (this.saldoRestante <= this.saldoTotal / 10) {
+    if (this.saldoRestante <= this.saldoTotal / 8) {
       this.colorFondo = 'table-danger';
     }
   }
-
   eliminarGasto(trElement: any, value: any) {
     let tr = trElement;
     let valorEliminar = +value;
     this.saldoRestante = this.saldoRestante + valorEliminar;
+    this.valorParcial = this.valorParcial - valorEliminar;
     tr.style.display = 'none';
     // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
-    if (this.saldoRestante <= this.saldoTotal) {
-      this.colorFondo = 'table-table-success';
+    if (this.saldoRestante <= this.saldoTotal && this.saldoRestante > this.saldoTotal /2) {
+      this.colorFondo = 'table-success';
     }
-    if (this.saldoRestante <= this.saldoTotal / 2) {
-      this.colorFondo = 'table-secondary';
-    }
-    if (this.saldoRestante <= this.saldoTotal / 4) {
+    if (this.saldoRestante <= (this.saldoTotal / 2)) {
       this.colorFondo = 'table-info';
     }
-    if (this.saldoRestante <= this.saldoTotal / 8) {
+    if (this.saldoRestante <= this.saldoTotal / 4) {
       this.colorFondo = 'table-warning';
     }
-    if (this.saldoRestante <= this.saldoTotal / 10) {
+    if (this.saldoRestante <= this.saldoTotal / 8) {
       this.colorFondo = 'table-danger';
     }
   }
-
+  // GUARDAR PRESUPUESTO EN IMAGEN, PDF Y PLANTILLA.
   downloadImagen() {
     const contenedor = document.getElementById('contenedor');
-    // Nota: no necesitamos contenedor, pues vamos a descargarla
-    html2canvas(contenedor) // Llamar a html2canvas y pasarle el elemento
+    html2canvas(contenedor)
       .then((canvas) => {
-        // Cuando se resuelva la promesa traerá el canvas
-        // Crear un elemento <a>
+        this.namePresupuesto = this.nombrePresupuesto.nativeElement;
         let enlace = document.createElement('a');
-        enlace.download = 'Captura de página web - Parzibyte.me.png';
-        // Convertir la imagen a Base64
+        enlace.download = `Presupuesto: ${this.namePresupuesto.value}`;
         enlace.href = canvas.toDataURL();
-        // Hacer click en él
         enlace.click();
     });
   }
-
   public downloadPDF() {
-    const botonAdd: any = document.getElementById('agregar');
-
-    // Extraemos el ELEMENTO
     const DATA: any = document.getElementById('htmlData');
     const doc = new jsPDF('p', 'pt', 'a4');
     const options = {
@@ -146,9 +129,6 @@ export class CrearComponent {
     html2canvas(DATA, options)
       .then((canvas) => {
         const img = canvas.toDataURL('image/PNG');
-        const divHeight = document.getElementById('htmlData');
-
-        // Add image Canvas to PDF
         const bufferX = 0;
         const bufferY = 0;
         const imgProps = (doc as any).getImageProperties(img);
@@ -167,10 +147,10 @@ export class CrearComponent {
         return doc;
       })
       .then((docResult) => {
-        docResult.save(`${new Date().toISOString()}_tutorial.pdf`);
+        this.namePresupuesto = this.nombrePresupuesto.nativeElement;
+        docResult.save(`Presupuesto: ${this.namePresupuesto.value}.pdf`);
       });
   }
-
   guardarPlantilla(namePresupuesto: any) {
     this.plantillaCompleta.push({
       nombrePresupuesto: namePresupuesto,
