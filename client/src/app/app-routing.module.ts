@@ -12,7 +12,7 @@ const routes: Routes = [
     path: 'crear-presupuesto', component: CrearComponent
   },
   {
-    path: 'actualizar-presupuesto:id', component: ActualizarComponent
+    path: 'actualizar-presupuesto/:id', component: ActualizarComponent
   },
   {
     path: '**', redirectTo: 'home'

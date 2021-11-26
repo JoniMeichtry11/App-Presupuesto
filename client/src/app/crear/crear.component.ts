@@ -1,8 +1,12 @@
+import { Router } from '@angular/router';
 import { Component, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ToastrService } from 'ngx-toastr';
+import { PlantillasService } from '../services/plantillas.service';
+import { Plantilla } from '../model/plantilla';
+import { GastoValor } from '../model/gastoValor';
 
 @Component({
   selector: 'app-crear',
@@ -24,10 +28,11 @@ export class CrearComponent {
   valorParcial: any;
   colorFondo: any;
   // ARRAYS DEL PROYECTO
-  gastoValor: any[] = [];
-  plantillaCompleta: any[] = [];
+  gastoValor: GastoValor[] = [];
+  plantillaCompleta: Plantilla[] = [];
+  presupuestoCompleto = {};
 
-  constructor(private toastrSvc: ToastrService) {
+  constructor(private toastrSvc: ToastrService, private plantillaService: PlantillasService, private router: Router) {
     this.saldoTotal = 0;
     this.saldoRestante = 0;
     this.valorParcial = 0;
@@ -37,6 +42,22 @@ export class CrearComponent {
     this.saldoTotal = +value;
     this.saldoRestante = this.saldoTotal;
     this.saldoRestante = this.saldoRestante - this.valorParcial;
+    // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
+    if (
+      this.saldoRestante <= this.saldoTotal &&
+      this.saldoRestante > this.saldoTotal / 2
+    ) {
+      this.colorFondo = 'table-success';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 2) {
+      this.colorFondo = 'table-info';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 4) {
+      this.colorFondo = 'table-warning';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 8) {
+      this.colorFondo = 'table-danger';
+    }
   }
   cargarValorGasto(value: any) {
     this.valorAnterior = +value;
@@ -85,7 +106,8 @@ export class CrearComponent {
       this.colorFondo = 'table-danger';
     }
   }
-  eliminarGasto(trElement: any, value: any) {
+  eliminarGasto(trElement: any, value: any, index: number) {
+    this.gastoValor.splice(index, 1);
     let tr = trElement;
     let valorEliminar = +value;
     this.saldoRestante = this.saldoRestante + valorEliminar;
@@ -156,8 +178,18 @@ export class CrearComponent {
       nombrePresupuesto: namePresupuesto,
       saldoTotal: this.saldoTotal,
       saldoRestante: this.saldoRestante,
-      gastoValor: this.gastoValor,
+      valorParcial: this.valorParcial,
+      gastoValor: this.gastoValor
     });
-    console.log(this.plantillaCompleta);
+    this.presupuestoCompleto = this.plantillaCompleta[0];
+    console.log(this.presupuestoCompleto);
+
+    this.plantillaService.setPresupuesto(this.presupuestoCompleto)
+    .subscribe(
+      (res): void =>{
+        this.router.navigate(['home']);
+        this.toastrSvc.success('Plantilla Creada')
+      },
+      err => console.log(err))
   }
 }

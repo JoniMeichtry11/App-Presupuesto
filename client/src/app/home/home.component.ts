@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-
+import { PlantillasService } from "../services/plantillas.service";
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -7,13 +7,12 @@ import { Component, OnInit } from '@angular/core';
 })
 export class HomeComponent implements OnInit {
 
-  constructor() { }
+  constructor(public plantillaService:PlantillasService) { }
 
   ngOnInit(): void {
+    this.plantillaService.getPresupuestos().subscribe((data: any) => {
+      this.plantillaService.presupuesto = data;
+      console.log(data);
+    });
   }
-
-  click(){
-    console.log("click");
-  }
-
 }

@@ -1,15 +1,21 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
+
 import { jsPDF } from 'jspdf';
 import html2canvas from 'html2canvas';
 import { ToastrService } from 'ngx-toastr';
+import { PlantillasService } from '../services/plantillas.service';
+import { GastoValor } from '../model/gastoValor';
+import { Plantilla } from '../model/plantilla';
 
 @Component({
   selector: 'app-actualizar',
   templateUrl: './actualizar.component.html',
   styleUrls: ['./actualizar.component.css'],
 })
-export class ActualizarComponent {
+export class ActualizarComponent implements OnInit{
   // VALIDACIONES HTML
   nombre = new FormControl('', Validators.required);
   saldo = new FormControl('', Validators.required);
@@ -22,19 +28,74 @@ export class ActualizarComponent {
   valorParcial: any;
   colorFondo: any;
 
-  gastoValor: any[] = [];
-  plantillaCompleta: any[] = [];
+  gastoValor: GastoValor[] = [];
+  plantillaCompleta$: Plantilla[] = [];
+  presupuestoCompleto = {};
 
-  constructor(private toastrSvc: ToastrService) {
+  constructor(private toastrSvc: ToastrService, private rutaActiva: ActivatedRoute, public plantillaService: PlantillasService, private router: Router) {
     this.saldoTotal = 0;
     this.saldoRestante = 0;
     this.valorParcial = 0;
   }
+  ngOnInit(){
+    const id = this.rutaActiva.snapshot.params['id'];
+    this.plantillaService.getPresupuesto(id).subscribe(
+      (res) => {
+        this.plantillaCompleta$.push({
+          plantilla: res
+        })
+        this.initForm(this.plantillaCompleta$);
+      }
+    );
+  }
   // MÉTODOS
+  private initForm = (_data: any): void => {
+    // Inicializo los inputs y los valores de la tabla.
+    this.nombre = new FormControl(_data[0].plantilla.nombrePresupuesto, Validators.required);
+    this.saldo = new FormControl(_data[0].plantilla.saldoTotal, Validators.required);
+    this.gastoValor = _data[0].plantilla.gastoValor;
+    this.saldoTotal = _data[0].plantilla.saldoTotal;
+    this.saldoRestante = _data[0].plantilla.saldoRestante;
+    this.valorParcial = _data[0].plantilla.valorParcial;
+    // COLORES
+    // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
+    if (
+      this.saldoRestante <= this.saldoTotal &&
+      this.saldoRestante > this.saldoTotal / 2
+    ) {
+      this.colorFondo = 'table-success';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 2) {
+      this.colorFondo = 'table-info';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 4) {
+      this.colorFondo = 'table-warning';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 8) {
+      this.colorFondo = 'table-danger';
+    }
+  }
+
   inputSaldoTotal(value: any) {
     this.saldoTotal = +value;
     this.saldoRestante = this.saldoTotal;
     this.saldoRestante = this.saldoRestante - this.valorParcial;
+    // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
+    if (
+      this.saldoRestante <= this.saldoTotal &&
+      this.saldoRestante > this.saldoTotal / 2
+    ) {
+      this.colorFondo = 'table-success';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 2) {
+      this.colorFondo = 'table-info';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 4) {
+      this.colorFondo = 'table-warning';
+    }
+    if (this.saldoRestante <= this.saldoTotal / 8) {
+      this.colorFondo = 'table-danger';
+    }
   }
 
   cargarValorGasto(value: any) {
@@ -60,22 +121,19 @@ export class ActualizarComponent {
     if (this.saldoRestante <= this.saldoTotal / 8) {
       this.colorFondo = 'table-danger';
     }
-    console.log(this.valorParcial);
   }
 
-  editarGasto(editado: any) {
+  editarGasto(editado: any, gasto: any, index: number) {
     let edicion = +editado;
     this.saldoRestante = this.saldoRestante + this.valorAnterior;
     this.saldoRestante = this.saldoRestante - edicion;
-
-    console.log('valor anterior', this.valorAnterior);
-    console.log('primer valor', this.valorParcial);
     this.valorParcial = this.valorParcial - this.valorAnterior;
-    console.log('segundo valor', this.valorParcial);
     this.valorParcial = this.valorParcial + edicion;
-    console.log('tercer valor', this.valorParcial);
-
     this.valorAnterior = edicion;
+    this.gastoValor[index] = {
+      gasto: gasto,
+      valor: edicion
+    }
     // CAMBIO DE COLOR SEGÚN EL VALOR DEL SALDO RESTANTE CON RESPECTO AL SALDO TOTAL
     if (
       this.saldoRestante <= this.saldoTotal &&
@@ -94,7 +152,10 @@ export class ActualizarComponent {
     }
   }
 
-  eliminarGasto(trElement: any, value: any) {
+  eliminarGasto(trElement: any, value: any, index: number) {
+    console.log("Este era gastoValor: ", this.gastoValor);
+    this.gastoValor.splice(index, 1);
+    console.log("Este es ahora gastoValor: ", this.gastoValor);
     let tr = trElement;
     let valorEliminar = +value;
     this.saldoRestante = this.saldoRestante + valorEliminar;
@@ -151,8 +212,6 @@ export class ActualizarComponent {
     html2canvas(DATA, options)
       .then((canvas) => {
         const img = canvas.toDataURL('image/PNG');
-        const divHeight = document.getElementById('htmlData');
-
         // Add image Canvas to PDF
         const bufferX = 0;
         const bufferY = 0;
@@ -176,13 +235,45 @@ export class ActualizarComponent {
       });
   }
 
-  guardarPlantilla(namePresupuesto: any) {
-    this.plantillaCompleta.push({
+  actualizarPlantilla(namePresupuesto: any) {
+    this.plantillaCompleta$.push({
       nombrePresupuesto: namePresupuesto,
       saldoTotal: this.saldoTotal,
       saldoRestante: this.saldoRestante,
+      valorParcial: this.valorParcial,
       gastoValor: this.gastoValor,
     });
-    console.log(this.plantillaCompleta);
+
+    console.log(this.gastoValor);
+
+    this.presupuestoCompleto = this.plantillaCompleta$[1];
+
+    console.log(this.presupuestoCompleto);
+
+    const id = this.rutaActiva.snapshot.params['id'];
+    this.plantillaService.updatePresupuesto(id, this.presupuestoCompleto).subscribe(
+      (res) => {
+        console.log(res);
+        this.plantillaService.getPresupuestos();
+        this.router.navigate(['home']);
+        this.toastrSvc.success('Plantilla Actualizada');
+      }
+    )
+
+  }
+
+  eliminarPlantilla(){
+    const id = this.rutaActiva.snapshot.params['id'];
+    this.plantillaService.deletePresupuesto(id).subscribe(
+      (res) => {
+        this.plantillaService.getPresupuestos();
+        this.router.navigate(['home']);
+        this.toastrSvc.error('Plantilla Eliminada')
+      },
+      (err) => {
+        console.log(err);
+        this.toastrSvc.info('Algo ocurrio, intentelo de nuevo más tarde . . .')
+      }
+    )
   }
 }

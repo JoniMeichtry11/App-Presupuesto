@@ -1,5 +1,8 @@
 <div class="d-flex justify-content-center" id="htmlData">
   <div style="width: 100%; max-width: 50rem;">
+    <div class="d-flex justify-content-center mt-3">
+      <button class="btn btn-danger" (click)="eliminarPlantilla()">Eliminar plantilla <i class="fas fa-trash-alt"></i></button>
+    </div>
 
     <!-- Nombre del Presupuesto y Saldo total -->
 
@@ -38,14 +41,14 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let valorYgasto of gastoValor" #tr>
+        <tr *ngFor="let valorYgasto of gastoValor let i = index"  #tr>
           <td align="center" style="text-transform: capitalize;">{{valorYgasto.gasto}}</td>
           <td align="center" style="vertical-align:middle;">
             <input type="number" class="sinborde" [value]="valorYgasto.valor" #valorEdicion (focus)="cargarValorGasto(valorYgasto.valor)"
-            (keyup)="editarGasto(valorEdicion.value)">
+            (keyup)="editarGasto(valorEdicion.value, valorYgasto.gasto, i)">
           </td>
           <td data-html2canvas-ignore align="center" class="d-flex justify-content-center" style="text-decoration: none; padding-bottom: 10px;">
-            <a style="cursor: pointer;" (click)="eliminarGasto(tr, valorEdicion.value)"><i style="color: red;" class="fas fa-trash-alt"></i></a>
+            <a style="cursor: pointer;" (click)="eliminarGasto(tr, valorEdicion.value, i)"><i style="color: red;" class="fas fa-trash-alt"></i></a>
           </td>
         </tr>
       </tbody>
@@ -98,7 +101,7 @@
       (click)="downloadPDF()">
         Guardar como PDF<img src="../../assets/pdf.png" style="max-width: 30px;">
       </button>
-      <button class="col btn btn-success m-3"[disabled]="nombre.errors?.['required'] || saldo.errors?.['required']" (click)="guardarPlantilla(NombrePresupuesto.value)">Guardar plantilla</button>
+      <button class="col btn btn-success m-3"[disabled]="nombre.errors?.['required'] || saldo.errors?.['required']" (click)="actualizarPlantilla(NombrePresupuesto.value)">Actualizar plantilla</button>
     </div>
 
   </div>
