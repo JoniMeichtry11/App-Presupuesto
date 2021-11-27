@@ -184,12 +184,13 @@ export class CrearComponent {
     this.presupuestoCompleto = this.plantillaCompleta[0];
     console.log(this.presupuestoCompleto);
 
+
     this.plantillaService.setPresupuesto(this.presupuestoCompleto)
     .subscribe(
       (res): void =>{
-        this.router.navigate(['home']);
-        this.toastrSvc.success('Plantilla Creada')
       },
       err => console.log(err))
-  }
+      this.router.navigate(['home']);
+      this.toastrSvc.success('Plantilla Creada');
+    }
 }

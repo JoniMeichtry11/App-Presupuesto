@@ -254,26 +254,24 @@ export class ActualizarComponent implements OnInit{
     this.plantillaService.updatePresupuesto(id, this.presupuestoCompleto).subscribe(
       (res) => {
         console.log(res);
-        this.plantillaService.getPresupuestos();
-        this.router.navigate(['home']);
-        this.toastrSvc.success('Plantilla Actualizada');
       }
-    )
-
+      )
+      this.plantillaService.getPresupuestos();
+      this.router.navigate(['home']);
+      this.toastrSvc.success('Plantilla Actualizada');
   }
 
   eliminarPlantilla(){
     const id = this.rutaActiva.snapshot.params['id'];
     this.plantillaService.deletePresupuesto(id).subscribe(
       (res) => {
-        this.plantillaService.getPresupuestos();
-        this.router.navigate(['home']);
-        this.toastrSvc.error('Plantilla Eliminada')
       },
       (err) => {
         console.log(err);
         this.toastrSvc.info('Algo ocurrio, intentelo de nuevo más tarde . . .')
-      }
-    )
+      })
+    this.plantillaService.getPresupuestos();
+    this.router.navigate(['home']);
+    this.toastrSvc.error('Plantilla Eliminada');
   }
 }

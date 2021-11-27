@@ -8,7 +8,7 @@ import { Plantilla } from '../model/plantilla';
 })
 export class PlantillasService {
 
-  URL_API = "http://localhost:3000/home";
+  URL_API = "https://presupuestoapp-11.herokuapp.com/home";
 
   presupuesto: Plantilla[] = [];
 
