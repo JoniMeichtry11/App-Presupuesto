@@ -7,6 +7,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PlantillasService } from '../services/plantillas.service';
 import { Plantilla } from '../model/plantilla';
 import { GastoValor } from '../model/gastoValor';
+import { LoadingService } from '../services/loading.service';
 
 @Component({
   selector: 'app-crear',
@@ -32,7 +33,7 @@ export class CrearComponent {
   plantillaCompleta: Plantilla[] = [];
   presupuestoCompleto = {};
 
-  constructor(private toastrSvc: ToastrService, private plantillaService: PlantillasService, private router: Router) {
+  constructor(private toastrSvc: ToastrService, private plantillaService: PlantillasService, private router: Router, private loadingService: LoadingService) {
     this.saldoTotal = 0;
     this.saldoRestante = 0;
     this.valorParcial = 0;
@@ -174,6 +175,7 @@ export class CrearComponent {
       });
   }
   guardarPlantilla(namePresupuesto: any) {
+    this.loadingService.cargarSpinner();
     this.plantillaCompleta.push({
       nombrePresupuesto: namePresupuesto,
       saldoTotal: this.saldoTotal,
@@ -184,13 +186,18 @@ export class CrearComponent {
     this.presupuestoCompleto = this.plantillaCompleta[0];
     console.log(this.presupuestoCompleto);
 
-
     this.plantillaService.setPresupuesto(this.presupuestoCompleto)
     .subscribe(
       (res): void =>{
+        console.log(res);
+        this.loadingService.cerrarSpinner();
       },
-      err => console.log(err))
+      err => {
+        console.log(err);
+        this.loadingService.cerrarSpinner();
+      });
       this.router.navigate(['home']);
+      this.loadingService.cerrarSpinner();
       this.toastrSvc.success('Plantilla Creada');
     }
 }

@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { LoadingService } from '../services/loading.service';
 import { PlantillasService } from "../services/plantillas.service";
 @Component({
   selector: 'app-home',
@@ -6,17 +7,36 @@ import { PlantillasService } from "../services/plantillas.service";
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  
+
   deferredPrompt: any;
 
-  constructor(public plantillaService:PlantillasService) { }
+  constructor(public plantillaService:PlantillasService, private loadingService: LoadingService) { }
 
   ngOnInit(): void {
+    this.loadingService.cargarSpinner();
     this.initPWA();
-    this.plantillaService.getPresupuestos().subscribe((data: any) => {
-      this.plantillaService.presupuesto = data;
-      console.log(data);
-    });
+    this.plantillaService.getPresupuestos().subscribe(
+      (data: any) => {
+        this.plantillaService.presupuesto = data;
+        this.loadingService.cerrarSpinner();
+        console.log(data);
+      }),
+      (err: any) => {
+        this.loadingService.cerrarSpinner();
+        console.log(err);
+      };
+    setTimeout(() => {
+      this.plantillaService.getPresupuestos().subscribe(
+        (data: any) => {
+          this.plantillaService.presupuesto = data;
+          this.loadingService.cerrarSpinner();
+          console.log(data);
+        }),
+        (err: any) => {
+          this.loadingService.cerrarSpinner();
+          console.log(err);
+        };
+    }, 2000);
   }
 
   initPWA(){
@@ -31,6 +51,9 @@ export class HomeComponent implements OnInit {
     this.deferredPrompt.userChoise.then((choiceResult: any) => {
       if(choiceResult.outcome === 'accepted'){
         console.log("User accepted the A2HS prompt");
+      }
+      else{
+        console.log("No quiso instalar la APP :(");
       }
       this.deferredPrompt = null;
     });

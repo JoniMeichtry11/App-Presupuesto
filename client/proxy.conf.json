@@ -1,0 +1,10 @@
+{
+  "/home":{
+    "target": "https://presupuestoapp-11.herokuapp.com",
+    "secure": true,
+    "pathRewrite": {
+      "^/posts": ""
+    },
+      "changeOrigin": true
+  }
+}

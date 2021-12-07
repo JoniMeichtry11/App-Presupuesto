@@ -76,7 +76,7 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "presupuesto:build:production"
+              "browserTarget": "presupuesto:build:development"
             },
             "development": {
               "browserTarget": "presupuesto:build:development"

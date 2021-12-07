@@ -44,8 +44,8 @@
         <tr *ngFor="let valorYgasto of gastoValor let i = index"  #tr>
           <td align="center" style="text-transform: capitalize;">{{valorYgasto.gasto}}</td>
           <td align="center" style="vertical-align:middle;">
-            <input type="number" class="sinborde" [value]="valorYgasto.valor" #valorEdicion (focus)="cargarValorGasto(valorYgasto.valor)"
-            (keyup)="editarGasto(valorEdicion.value, valorYgasto.gasto, i)">
+            <input id="editInput" type="number" class="sinborde" [value]="valorYgasto.valor" #valorEdicion (focus)="cargarValorGasto(valorYgasto.valor)"
+            (blur)="editarGasto(valorEdicion.value, valorYgasto.gasto, i)">
           </td>
           <td data-html2canvas-ignore align="center" class="d-flex justify-content-center" style="text-decoration: none; padding-bottom: 10px;">
             <a style="cursor: pointer;" (click)="eliminarGasto(tr, valorEdicion.value, i)"><i style="color: red;" class="fas fa-trash-alt"></i></a>

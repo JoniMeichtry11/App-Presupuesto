@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Router } from '@angular/router';
@@ -9,6 +9,7 @@ import { ToastrService } from 'ngx-toastr';
 import { PlantillasService } from '../services/plantillas.service';
 import { GastoValor } from '../model/gastoValor';
 import { Plantilla } from '../model/plantilla';
+import { LoadingService } from './../services/loading.service';
 
 @Component({
   selector: 'app-actualizar',
@@ -16,6 +17,7 @@ import { Plantilla } from '../model/plantilla';
   styleUrls: ['./actualizar.component.css'],
 })
 export class ActualizarComponent implements OnInit{
+  @ViewChild('valorEdicion', {static: false}) valorEdicion: any;
   // VALIDACIONES HTML
   nombre = new FormControl('', Validators.required);
   saldo = new FormControl('', Validators.required);
@@ -27,17 +29,20 @@ export class ActualizarComponent implements OnInit{
   valorAnterior: any;
   valorParcial: any;
   colorFondo: any;
+  recarga: any;
 
   gastoValor: GastoValor[] = [];
   plantillaCompleta$: Plantilla[] = [];
   presupuestoCompleto = {};
 
-  constructor(private toastrSvc: ToastrService, private rutaActiva: ActivatedRoute, public plantillaService: PlantillasService, private router: Router) {
+  constructor(private toastrSvc: ToastrService, private rutaActiva: ActivatedRoute, public plantillaService: PlantillasService, private router: Router, private loadingService: LoadingService) {
     this.saldoTotal = 0;
     this.saldoRestante = 0;
     this.valorParcial = 0;
   }
   ngOnInit(){
+    this.loadingService.cargarSpinner();
+    this.internetLento(true);
     const id = this.rutaActiva.snapshot.params['id'];
     this.plantillaService.getPresupuesto(id).subscribe(
       (res) => {
@@ -45,6 +50,12 @@ export class ActualizarComponent implements OnInit{
           plantilla: res
         })
         this.initForm(this.plantillaCompleta$);
+        this.loadingService.cerrarSpinner();
+        clearTimeout(this.recarga);
+      },
+      (err) => {
+        this.loadingService.cerrarSpinner();
+        clearTimeout(this.recarga);
       }
     );
   }
@@ -150,8 +161,11 @@ export class ActualizarComponent implements OnInit{
     if (this.saldoRestante <= this.saldoTotal / 8) {
       this.colorFondo = 'table-danger';
     }
+    // setTimeout((): void => {
+    //   const valorEdicion = this.valorEdicion.nativeElement;
+    //   valorEdicion.focus();
+    // }, 1);
   }
-
   eliminarGasto(trElement: any, value: any, index: number) {
     console.log("Este era gastoValor: ", this.gastoValor);
     this.gastoValor.splice(index, 1);
@@ -234,8 +248,8 @@ export class ActualizarComponent implements OnInit{
         docResult.save(`${new Date().toISOString()}_tutorial.pdf`);
       });
   }
-
   actualizarPlantilla(namePresupuesto: any) {
+    this.loadingService.cargarSpinner();
     this.plantillaCompleta$.push({
       nombrePresupuesto: namePresupuesto,
       saldoTotal: this.saldoTotal,
@@ -254,24 +268,42 @@ export class ActualizarComponent implements OnInit{
     this.plantillaService.updatePresupuesto(id, this.presupuestoCompleto).subscribe(
       (res) => {
         console.log(res);
-      }
-      )
-      this.plantillaService.getPresupuestos();
-      this.router.navigate(['home']);
-      this.toastrSvc.success('Plantilla Actualizada');
-  }
-
-  eliminarPlantilla(){
-    const id = this.rutaActiva.snapshot.params['id'];
-    this.plantillaService.deletePresupuesto(id).subscribe(
-      (res) => {
+        this.loadingService.cerrarSpinner();
       },
       (err) => {
         console.log(err);
-        this.toastrSvc.info('Algo ocurrio, intentelo de nuevo más tarde . . .')
+        this.loadingService.cerrarSpinner();
       })
-    this.plantillaService.getPresupuestos();
-    this.router.navigate(['home']);
-    this.toastrSvc.error('Plantilla Eliminada');
+      this.loadingService.cerrarSpinner();
+      this.router.navigate(['home']);
+      this.toastrSvc.success('Plantilla Actualizada');
+      this.plantillaService.getPresupuestos();
+  }
+
+  eliminarPlantilla(){
+    this.loadingService.cargarSpinner();
+    const id = this.rutaActiva.snapshot.params['id'];
+    this.plantillaService.deletePresupuesto(id).subscribe(
+      (res) => {
+        console.log(res);
+        this.loadingService.cerrarSpinner();
+      },
+      (err) => {
+        console.log(err);
+        this.loadingService.cerrarSpinner();
+      })
+      this.router.navigate(['home']);
+      this.plantillaService.getPresupuestos();
+      this.toastrSvc.success('Plantilla Eliminada');
+  }
+  internetLento(valor: boolean){
+    if(valor){
+      this.recarga = setTimeout(() => {
+        this.toastrSvc.info('Ten paciencia, tu internet es un poco lento ...', "PACIENCIA", {timeOut: 10000});
+      }, 7000);
+      return this.recarga;
+    } else{
+      return false;
+    }
   }
 }
