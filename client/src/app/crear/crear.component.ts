@@ -130,8 +130,10 @@ export class CrearComponent {
   }
   // GUARDAR PRESUPUESTO EN IMAGEN, PDF Y PLANTILLA.
   downloadImagen() {
+    let contenido: any;
     const contenedor = document.getElementById('contenedor');
-    html2canvas(contenedor)
+    contenido = contenedor;
+    html2canvas(contenido)
       .then((canvas) => {
         this.namePresupuesto = this.nombrePresupuesto.nativeElement;
         let enlace = document.createElement('a');

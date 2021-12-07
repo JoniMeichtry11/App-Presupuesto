@@ -196,12 +196,11 @@ export class ActualizarComponent implements OnInit{
   // GUARDAR PRESUPUESTO
 
   downloadImagen() {
+    let contenido: any;
     const contenedor = document.getElementById('contenedor');
-    // Nota: no necesitamos contenedor, pues vamos a descargarla
-    html2canvas(contenedor) // Llamar a html2canvas y pasarle el elemento
+    contenido = contenedor;
+    html2canvas(contenido)
       .then((canvas) => {
-        // Cuando se resuelva la promesa traerá el canvas
-        // Crear un elemento <a>
         let enlace = document.createElement('a');
         enlace.download = 'Captura de página web - Parzibyte.me.png';
         // Convertir la imagen a Base64
