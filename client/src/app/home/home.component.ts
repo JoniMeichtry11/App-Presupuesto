@@ -37,6 +37,30 @@ export class HomeComponent implements OnInit {
           console.log(err);
         };
     }, 2000);
+    setTimeout(() => {
+      this.plantillaService.getPresupuestos().subscribe(
+        (data: any) => {
+          this.plantillaService.presupuesto = data;
+          this.loadingService.cerrarSpinner();
+          console.log(data);
+        }),
+        (err: any) => {
+          this.loadingService.cerrarSpinner();
+          console.log(err);
+        };
+    }, 5000);
+    setTimeout(() => {
+      this.plantillaService.getPresupuestos().subscribe(
+        (data: any) => {
+          this.plantillaService.presupuesto = data;
+          this.loadingService.cerrarSpinner();
+          console.log(data);
+        }),
+        (err: any) => {
+          this.loadingService.cerrarSpinner();
+          console.log(err);
+        };
+    }, 10000);
   }
 
   initPWA(){
