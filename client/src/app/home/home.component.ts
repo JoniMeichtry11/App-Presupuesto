@@ -61,6 +61,12 @@ export class HomeComponent implements OnInit {
           console.log(err);
         };
     }, 10000);
+
+    window.addEventListener('appinstalled', async function(e){
+      let buttonInstaller: any;
+      buttonInstaller = document.getElementById('pwaInstaller');
+      buttonInstaller.style.display = "none";
+    })
   }
 
   initPWA(){
