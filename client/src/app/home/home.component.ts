@@ -13,54 +13,54 @@ export class HomeComponent implements OnInit {
   constructor(public plantillaService:PlantillasService, private loadingService: LoadingService) { }
 
   ngOnInit(): void {
-    this.loadingService.cargarSpinner();
-    this.initPWA();
-    this.plantillaService.getPresupuestos().subscribe(
-      (data: any) => {
-        this.plantillaService.presupuesto = data;
-        this.loadingService.cerrarSpinner();
-        console.log(data);
-      }),
-      (err: any) => {
-        this.loadingService.cerrarSpinner();
-        console.log(err);
-      };
-    setTimeout(() => {
-      this.plantillaService.getPresupuestos().subscribe(
-        (data: any) => {
-          this.plantillaService.presupuesto = data;
-          this.loadingService.cerrarSpinner();
-          console.log(data);
-        }),
-        (err: any) => {
-          this.loadingService.cerrarSpinner();
-          console.log(err);
-        };
-    }, 2000);
-    setTimeout(() => {
-      this.plantillaService.getPresupuestos().subscribe(
-        (data: any) => {
-          this.plantillaService.presupuesto = data;
-          this.loadingService.cerrarSpinner();
-          console.log(data);
-        }),
-        (err: any) => {
-          this.loadingService.cerrarSpinner();
-          console.log(err);
-        };
-    }, 5000);
-    setTimeout(() => {
-      this.plantillaService.getPresupuestos().subscribe(
-        (data: any) => {
-          this.plantillaService.presupuesto = data;
-          this.loadingService.cerrarSpinner();
-          console.log(data);
-        }),
-        (err: any) => {
-          this.loadingService.cerrarSpinner();
-          console.log(err);
-        };
-    }, 10000);
+    // this.loadingService.cargarSpinner();
+    // this.initPWA();
+    // this.plantillaService.getPresupuestos().subscribe(
+    //   (data: any) => {
+    //     this.plantillaService.presupuesto = data;
+    //     this.loadingService.cerrarSpinner();
+    //     console.log(data);
+    //   }),
+    //   (err: any) => {
+    //     this.loadingService.cerrarSpinner();
+    //     console.log(err);
+    //   };
+    // setTimeout(() => {
+    //   this.plantillaService.getPresupuestos().subscribe(
+    //     (data: any) => {
+    //       this.plantillaService.presupuesto = data;
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(data);
+    //     }),
+    //     (err: any) => {
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(err);
+    //     };
+    // }, 2000);
+    // setTimeout(() => {
+    //   this.plantillaService.getPresupuestos().subscribe(
+    //     (data: any) => {
+    //       this.plantillaService.presupuesto = data;
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(data);
+    //     }),
+    //     (err: any) => {
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(err);
+    //     };
+    // }, 5000);
+    // setTimeout(() => {
+    //   this.plantillaService.getPresupuestos().subscribe(
+    //     (data: any) => {
+    //       this.plantillaService.presupuesto = data;
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(data);
+    //     }),
+    //     (err: any) => {
+    //       this.loadingService.cerrarSpinner();
+    //       console.log(err);
+    //     };
+    // }, 10000);
 
     window.addEventListener('appinstalled', async function(e){
       let buttonInstaller: any;
